@@ -1,0 +1,122 @@
+---
+title: "SOK-2008-2022-oppgave1"
+author: "Ida Marie Hansen Bergland"
+date: "2022-09-06"
+output: html_document
+---
+
+```{r setup, include= TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Koder til oppgave 1.3.5
+```{r}
+#Laster pakker vi trenger
+library(tidyverse)
+library(readxl) 
+library(ineq)
+
+# Set your working directory to the correct folder.
+#Sett working directory der du laster ned exelfilen)
+# Sørg for å ha denne oppe til jobbing
+Gini_coff <- read_excel("GCIPrawdatatest.xlsx", skip = 2)  
+#Nå er dataene i en tibble, la oss se på de øveste
+head(Gini_coff) 
+#Loops brukes for å lage ny variabel
+Gini_coff$gini <- 0
+
+Ada <- nrow(Gini_coff)
+
+for (i in seq(1, Ada)){
+  Bada <- unlist(Gini_coff[i, 3:12])
+  Gini_coff$gini[i] <- Gini(Bada)
+}
+
+#trekke ut landene vi skal ha
+dada <- subset(
+  Gini_coff, Country %in% c("United States","Sweden","Finland","Norway", 
+                              "Denmark"))
+
+
+#så lager vi et plot
+
+ggplot(dada, 
+       aes(x = Year, y = gini, color = Country)) +
+  geom_line(size = 1) +
+  theme_gray() +
+  xlab("År") +
+  ylab("Gini") +
+  ggtitle("Gini koeffisient for de nordiske land og USA")
+
+
+
+#Kodene er hentet fra
+#https://github.com/uit-sok-2008-h22/uit-sok-2008-h22.github.io/blob/main/Assets/Gini%20coefficients.R
+#som igjen har brukt eksempelet som er basert på webpages of CORE: https://www.core-econ.org/doing-economics/book/text/05-03.html#extension-r-walk-through-55-calculating-gini-coefficients-for-all-countries-and-all-years-using-a-loop.
+
+```
+
+# Koder til oppgave 1.3.6
+```{r}
+
+#Laste pakkene vi trenger
+library(gglorenz)
+library(PxWebApiData)
+library(janitor)
+library(dplyr)
+library(tidyr)
+#Hvilke variabler som finnes i tabellen
+variables <- ApiData("https://data.ssb.no/api/v0/en/table/12558/", 
+                     returnMetaFrames = TRUE)
+names(variables)
+
+#hvilke verdier har ulike variablene
+values <- ApiData("https://data.ssb.no/api/v0/en/table/12558/", 
+                  returnMetaData = TRUE)
+#Kommunekoder
+values[[1]]$values
+#Inntekt før/etter skatt
+values[[2]]$values # 00 = Samlet inntekt, 00S=Inntekt etter skatt
+#Desiler
+values[[3]]$values
+#Statistikkvariabel
+values[[4]]$values
+#År
+values[[5]]$values
+
+
+datasett <-ApiData("https://data.ssb.no/api/v0/en/table/12558/",
+              Tid =c("2005","2020"), # Velg årene 2005 og 2020
+              Desiler=c("01", "02", "03" ,"04", "05", "06" ,"07", "08" ,"09", "10"), #Vi velger alle desiler
+              InntektSkatt="00", #Vi velger samlet inntekt
+              ContentsCode="VerdiDesil", #Velger den høyeste verdien i desilen
+              Region=c("5401","1902"))#Tromsø endret kommunenummer i 2020
+
+
+#lista gjøres om til å bli en dataframe og så ta bort NA/ugyldige verdier
+datasett <- as.data.frame(datasett)
+datasett %>% 
+  na.omit()
+
+#så må vi lage lorentzkurven
+datasett %>%
+  ggplot(aes(x=dataset.value,colour=dataset.Tid)) +
+  stat_lorenz(desc = FALSE) +
+  coord_fixed() +
+  geom_abline(linetype = "dashed") +
+  theme_gray() +
+  hrbrthemes::scale_x_percent() +
+  hrbrthemes::scale_y_percent() +
+  labs(x = "Tromsøs befolkning",
+       y = "Inntekt Tromsøs befolkning",
+       title = " Lorenz-kurve for inntektsfodelingen
+       for Tromsø Kommune i 2005 og 2020")
+
+
+#Koder fra nedlastet fil tromsoe.R
+#koder til lorentzkurve hentet fra https://github.com/jjchern/gglorenz
+
+
+
+```
