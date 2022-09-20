@@ -1,0 +1,139 @@
+---
+title: "Innlevering 2, Utfordring 2.3"
+author: "Kandidatnr 2"
+date: "2022-09-20"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Utfordring nr 2.3
+
+## Første del.
+
+```{r}
+# restarte
+rm(list = ls())
+
+# Laster inn pakker vi må bruke.
+library(sf)
+library(plyr)
+library(dplyr)
+library(readr)
+library(cowplot)
+library(ggplot2)
+library(tidyverse)
+
+# endrer til norsk språk og lager arbeidsrom.
+Sys.setlocale(locale="no_NO")
+setwd("~/")
+
+# Laster inn "union_unempl.csv" og leser denne
+union <- read.csv("union_unempl.csv") 
+view(union)
+
+# Endrer navn på United Kingdom da dette er for langt og i to deler.
+union$country <- gsub("United Kingdom", "UK", union$country) 
+view(union)
+
+# Endrer navn på kolonne.
+names(union)[names(union) == "country"] <- "region"
+
+# Laster in mapdata
+mapdata <- map_data("world") 
+view(mapdata)
+
+
+
+# slå sammen datasettene.
+mapdata <- left_join(mapdata, union, by = "region")
+view(mapdata)
+
+
+# Tar bort NA.
+mapdata1 <- mapdata %>% drop_na(unempl) 
+
+# arbeidsledighetsraten
+map1 <- ggplot(mapdata1, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = unempl), color = "black")
+
+
+map1 <- map1 + scale_fill_gradient(name = "% unempl", 
+                                   low = "purple", 
+                                   high = "red",
+                                   na.value = "grey50") +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        rect = element_blank())
+map1
+
+```
+
+## Andre del
+
+```{r}
+# Fjerner NA.
+mapdata2 <- mapdata %>% filter(!is.na(mapdata$density)) 
+
+# Fagforeningsdensitet.
+map2 <- ggplot(mapdata2, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = density), color = "black")
+
+map2 <- map2 + scale_fill_gradient(name = "% Fagforeningsdensitet", 
+                                   low = "blue", 
+                                   high = "red",
+                                   na.value = "grey50") +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        rect = element_blank())
+map2
+
+# ny kolonne
+mapdata2$Excess_coverage <- mapdata2$coverage - mapdata2$density
+
+# xxcess_coverage.
+map3 <- ggplot(mapdata2, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = Excess_coverage), color = "black")
+
+map3 <- map3 + scale_fill_gradient(name = "% Excess_coverage", 
+                                   low = "yellow", 
+                                   high = "green",
+                                   na.value = "grey50") +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        rect = element_blank())
+map3
+
+#koordinering av lønnsfastsettelser.
+map4 <- ggplot(mapdata2, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = coord), color = "black") +
+  scale_fill_brewer(name="Koordinering", palette= "Set1")
+
+map4 <- map4 +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        rect = element_blank())
+map4
+
+
+```
+
+## Tredje del
+
+#se innlevert pdf fil
+
+Koder inspirert fra: <https://www.youtube.com/watch?v=AgWgPSZ7Gp0>
