@@ -1,0 +1,235 @@
+---
+title: "SOK-2008-2022-oppgave3"
+author: "Kandidatnummer 2"
+format: docx
+editor: visual
+---
+
+## Innlevering 3
+
+### **Utfordring 3.1**
+
+**Oppgave 1**
+
+```{r}
+#Oppgave 3.1.1
+
+#velger pakker vi skal bruke
+
+library(OECD)
+library(ggplot2)
+library(tidyverse)
+library(dplyr)  
+library(ggrepel) 
+library(janitor)
+library(PxWebApiData)
+library(tidyr)
+library(cowplot)
+#laste inn variablene og se på navnene på radene.
+variabler <- ApiData("https://data.ssb.no/api/v0/no/table/11155/", returnMetaFrames = TRUE)
+#names(variabler)
+#så må vi laste inn og se på hva slags verdier de ulike variablene har
+verdier <- ApiData("https://data.ssb.no/api/v0/no/table/11155/", 
+                  returnMetaData = TRUE)
+#og ved å da se på hver rekke så får jeg opp hva jeg har under hver variablel(Blir hashtagget i visualstudio(r) for å hindre output da dette ikke er nødvendig til pdffilen, vil ligge full kode på github)
+#Kjønn er denne
+verdier[[1]]$values
+#Aldersgruppe er denne
+verdier[[2]]$values 
+#Utdanningsnivå er denne
+verdier[[3]]$values
+#Contenscode er statistikkvariablen og vi skal ha den i arbeidsledig i prosent
+verdier[[4]]$values
+#Tid, her er årstallene
+verdier[[5]]$values
+
+#så må jeg trekke ut de verdiene jeg har behov for, år 2020, to aldergrupper, alle utdanningsnivå
+#arbeidsledighet i prosent og begge kjønn.
+variablene <-ApiData("https://data.ssb.no/api/v0/no/table/11155/",
+                   Tid =c("2020"), 
+                   Alder=c("15-24", "20-64"),
+                   UtdNivaa="TOT",
+                   ContentsCode="ArbLedigProsent",
+                   Kjonn=c("0"))
+
+#gjøre om til en dataramme
+variabler1 <- as.data.frame(variablene)
+
+#gi noen nye navn
+variabler1 <- variabler1 %>% rename(Aldersgruppe = dataset.Alder, Arbeidsledighet= dataset.value)
+#så lager et histogram med disse to verdiene.
+
+ggplot(variabler1, aes(x=Aldersgruppe, y = Arbeidsledighet,
+                       color = Aldersgruppe, )) +
+  geom_point(size = 4) +
+  theme_bw() +
+  labs(title= "Arbeidsledighet i prosent i aldergruppene 15-24 og 20-64",
+       subtitle ="Figur 1
+       Viser at i aldersgruppen 15-24 er ledigheten 11.5% mens 20-64 kun er på 4.1%")
+
+```
+
+Det første man kan observere i figur 1 som er fra dataene fra SSB om arbeidsledighet i Norge i 2020 er at gruppen 15 til 24 år har mye større ledighet enn den voksne gruppen på 20 til 64 år. Siden disse to også overlapper hverandre vil det tenkes at den største delen av arbeidsledighet er i den yngste gruppen og er de som er under 20 år.
+
+I Norge har vi en form for minstelønn i form av tariff festet minstelønn innenfor en bransje eller yrke etc.
+
+I teorien vil en minstelønn gi ineffektivitet og arbeidsledighet.
+
+Hvis vi ser på figur 2
+
+![Figur 2](figur1oppg3.1.gif){fig-align="center"}
+
+Figuren viser en enkel illustrasjon av tilbud og arbeidskraft ved likevekts lønn og en minstelønn generelt.
+
+Hvis minstelønnen (grønne linjene) settes høyere enn likevektslønnen (oransje linjene) vil etterspørsel av arbeidskraft gå ned, Man går fra å være i likevekt i punkt A til å komme til punkt B. Dette skaper et dødvektstap både for arbeidersiden og bedriftssiden. Det blå og det oransje fagede områdene illustererer dødvektstapet, altså overskuddet som blir borte for begge parter. Like til dels vil en høyere minstelønn øke overskuddet til de som er i arbeid samt minke overskuddet til bedriften. Til gjengjeld vil arbeidsledigheten gå opp, og dette vil på figuren være avstanden fra punkt B til C.
+
+Hvis vi ser for oss de to gruppene vi har, de på 15 til 24 år og de på 20 til 64 år som får samme minstelønn, vil vi på en illustrasjon kunne se for eksempel dette:(figur 3)
+
+![Figur 3](bildeopg3.1....gif){fig-align="center"}
+
+Hvis minstelønnen settes litt over likevektslønnen til de voksne arbeiderne så vil etterspørselen etter arbeidskraft gå ned, ikke like mye for de voksne som for de unge. Etterspørselen går ned fra punkt A til B for de unge, men for de voksne fra C til D. legge merke til avstanden mellom disse. Som sagt så er det et markant større sprik fra punkt til punkt for de unge en for de voksne. Arbeidsledigheten øker, for de voksne vil denne være avstanden fra punkt D til E, og de unge vil ha en større arbeidsledighet som er avstanden fra punkt B til E.
+
+Forskjellen kan ha bunn i at det er mer effektivt for bedriften å ha en voksen ansatt som kan ha ansvar, kontra en ungdom som kun kan ha begrenset ansvar men samtidig måtte ha samme lønn. Men i å med at dette er i 2020 hvor korona-pandemien slo inn så er nok tallene påvirket av dette da mange som jobbet deltid ble permittert eller mistet jobbene sine, især studenter og de yngre med kortest ansiennitet har måtte gå først. Men også i enkelte bransjer har de måtte skalere ned. for pr idag er situasjonen motsatt, med at det er vanskelig å finne nok arbeidere til å fylle arbeidsplassene, men mulig vil snu og stabilisere seg på likevektsledigheten på sikt.( *Myklathun, Sørbø ,Vidal-Gil, Nav,*Arbeid og velferd nr.2-2022)
+
+**Oppgave 2**
+
+```{r}
+#Oppgave 3.1.2
+
+#Her er det satt inn det vi skulle i kodene vi fikk i filen Utf_3.1.R pluss noen endringer/tillegg jeg har gjort. 
+# Laste inn datasett vi skal bruke/søke etter datasett
+dsets<-get_datasets()
+search_dataset("wage",dsets)
+search_dataset("unemployment",dsets)
+#Ender med:
+#Data on minimum wages er tilgjengelig i "MIN2AVE"
+#Data on unemployment er tilgjengelig i "MIG_NUP_RATES_GENDER"
+
+
+#MinWage
+minwage <- get_dataset("MIN2AVE",
+                       filter = "USA+CAN+FRA+GBR+DEU+NZL", 
+                       pre_formatted = TRUE)
+
+#Velger år og min wage som en del av median wage
+minwage2019 <- subset(minwage, Time < 2019 & Time >2007 & SERIES=="MEDIAN")
+minwage2007_2019 <- subset(minwage2019, Time>2007)
+
+#UnEmpl
+unempl <- get_dataset("MIG_NUP_RATES_GENDER",
+                      filter = "USA+CAN+FRA+GBR+DEU+NZL", 
+                      pre_formatted = TRUE)
+
+#Velger år, arbeidsledighetsraten i landene og begge kjønn
+unempl2019 <- subset(unempl, Time<2019 & RATE=="U_RATE" & BIRTH=="NB" & GENDER=="TOT")
+unempl2007_2019 <- subset(unempl2019, Time>2007)
+
+#Kombinerer datasettene og tar bort land med ingen data
+minwage_unempl <-left_join(minwage2007_2019, unempl2007_2019, by=c("COUNTRY","Time"))
+complete_minwage_unempl <- na.omit(minwage_unempl)
+
+#Endrer til numeric variabler
+complete_minwage_unempl$MinWage_0 <-as.numeric(complete_minwage_unempl$ObsValue.x)
+complete_minwage_unempl$UnEmpl <-as.numeric(complete_minwage_unempl$ObsValue.y)
+
+#Endrer minwage til prosent
+complete_minwage_unempl$MinWage <- complete_minwage_unempl$MinWage_0 * 100
+
+#Lager et plott som viser minimumslønnen over tid
+minwage_plot <- ggplot(data=complete_minwage_unempl,aes(x=Time,y=MinWage , group=COUNTRY, color=COUNTRY)) +
+  geom_line(aes(group=COUNTRY), size=1) +
+  geom_point(size=2.5)+
+  labs(x = "År" , y ="MinWage in % of medianwage", title = "Verdi minstelønn over tid", subtitle = "Figur 5")  +
+  theme()
+#et plott med arbeidsledighet over tid
+minwage_plot1 <- ggplot(data=complete_minwage_unempl,aes(x=Time,y=UnEmpl , group=COUNTRY, color=COUNTRY)) +
+  geom_line(aes(group=COUNTRY), size=1) +
+  geom_point(size=2.5)+
+  labs(x = "År" , y ="unemployment in %", title = "Arbeidsledighet over tid", subtitle = "Figur 6")  +
+  theme()
+
+#selve plottet vi skal ha fram
+minwage_plot2 <- ggplot(data=complete_minwage_unempl,aes(x=UnEmpl,y=MinWage , group=Time, color=COUNTRY)) +
+  geom_line(aes(group=COUNTRY), size=1) +
+  geom_point(size=2.5)+
+  labs(x = "Unemployment in %" , y ="MinWage in % of medianwage", title = "Minstelønn og arbeidsledighet", subtitle = "Figur 4")  +
+  theme(legend.position="none")+
+  geom_label_repel(
+    data=complete_minwage_unempl %>% group_by(COUNTRY) %>%
+      filter(UnEmpl ==min(UnEmpl)),
+    aes(UnEmpl , MinWage, fill = factor(COUNTRY), label = sprintf('%s', COUNTRY)),
+    color = "black",
+    fill = "white")
+minwage_plot2
+
+
+```
+
+I denne figuren(figur 4) over har vi minstelønnen i prosent andel av medianinntekten på y aksen og arbeidsledigheten i prosent på x aksen. Det vi kan se er at arbeidsledigheten øker ved minstelønn, den øker uavhengig av hvor stor minstelønnen er. Men nå er ikke disse verdiene satt etter årstall så dette ser vi bort fra. USA har ganske høy ledighet, Frankrike også, Tyskland har lavere ledighet selv om de har nesten 50% av medianlønnen som minstelønn. Selv om minstelønnen er lav i USA er ledigheten også mye større enn i de andre landene når den nærmer seg 10 % ledighet.
+
+Hvis man ser på arbeidsledigheten over tid og utviklingen på minstelønnen over tid så kan vi se at arbeidsledigheten steg kraftig etter 2008 og fram til 2010 før utviklingen snudde,med unntak av Frankrike. La oss se på figurene under(figur 5 og 6)
+
+```{r}
+minwage_plot
+minwage_plot1
+```
+
+Ifølge figurene så er trenden at arbeidsledigheten er høy i tidsrommet 2008 til 2010, dette kommer nok av finanskrisen som slo ut i 2008 til 2009 kan nok ha en del skyld i den bratte stigningen. ledigheten har gått ned over tid, men at minimumslønnen enten stiger eller synker har ikke noen åpenbar forklaring utfra det vi ser generelt over alle landene samlet. Årsakene på de forskjellige kan være mangt. Hvis vi tar utgangspunkt i et perfekt arbeidsmarked så vil minstelønn være ganske nært likevektslønnen og det vil være noe dødvektstap, se første forklaring i oppgave 1. Hvis vi ser på figur 4, så er arbeidsledigheten lavere når minimumslønnen er høyere. USA skiller seg ut ved at det er motsatt. I teorien skal økt minstelønn over likevektslønnen føre til økt arbeidsledighet, i dette tilfelle stemmer ikke dette da økt minstelønn gir økt sysselsetting, det viser bare til at arbeidsmarkedet er ufullkomment hvor økt minstelønn også kan gi økt sysselsetting og effektivitet. USA er det landet da som kan følge teorien til perfekt arbeidsmarked da økt minstelønn gir økt arbeidsledighet. Når arbeidsledigheten øker men individene vil ha jobb vil de individene som ikke får jobb i det formelle markedet få jobb i det uformelle, de jobber svart for en lavere lønn enn i det formelle markedet og jo flere som må jobbe svart bidrar til at det uformelle markedet vokser og kvaliteten på arbeidet fra de som jobber svart kan også være sprikende.
+
+**Oppgave 3**
+
+La oss studere grafen av Storbritannia.
+
+```{r}
+minwage_plot2
+```
+
+GBR eller Storbritannia har en lavere ledighet ved høyere minimumslønn enn ved lavere minimumslønn og vi kan se på at landet har en ufullkomment arbeidsmarked. I figur 7:
+
+![Figur 7](images/innlev3fig5111.gif){fig-align="center"}
+
+I et monopsoni marked vil likevektslønnen være i punkt B. For at bedriften skal ha max profitt er siste time kostnad MLC lik MRPL altså i punkt A. Det de ender opp med er lønn lik wm og antall sysselsatte lik Lm. Det endes opp i punkt C.
+
+Hvis vi legger til en minstelønn i dette markedet vil vi få flere effekter, i figur 8 ser vi dette:
+
+![Figur 8](images/innlev3fig522.gif){fig-align="center"}
+
+Hvis minstelønnen settes en plass imellom likevektslønnen og MLP=MRPL vil vi få et nytt punkt, punkt D, det utgjør at bedriften vil øke sin sysselsetting fra Lm til L1 og samtidig vil dødvektstapet bli mindre, fra å være mellom punktene ABC til å være mellom Dlinjen og B punktet. Så ved å sette en balansert minstelønn vil man øke effektiviteten og sysselsettingen samtidig som dødvektsstapet reduseres.
+
+Legges derimot minstelønnen lavere enn likevektslønnen vil tilbudet av arbeidskraft gå ned og det blir flere arbeidsledige, samme hvis man legger den høyere vil også arbeidsledigheten gå opp da bedriftene vil ansette færre når kostnadene for hver ansatt blir høyere.
+
+Det jeg kan anta er at Storbritannia kan ha funnet den beste pr da minstelønnen for å ha lavest mulig ledighet i det første punktet.
+
+**Oppgave 4**
+
+Å sammenligne ulike land, kan gi oss feile konklusjoner i forhold til sammenheng mellom nivå på minstelønn og arbeidsledighet, dette fordi ingen land er like, land kan ha forskjellig tilgang til ressurser, de kan ha forskjellige styreformer og førende politikk i forhold til arbeid og velferd. Det nærmeste man kan komme ved sammenlikning er land som er tilnærmet like i tilgang på ressurser og styresett og ikke minst kultur.
+
+En metode som kan brukes er først å finne to sammenlignbare grupper som også er forskjellige i sine tall, deretter gjøre en endring i den ene gruppen, så identifisere endringene i begge gruppene etterpå og se om den forskjellen som er, er blitt større, mindre eller uendret og evaluere effekten om det kun er minstelønnen som gir noen endring eller om det er andre faktorer som spiller inn. Mange av faktorene som kan spille inn på arbeidsmarked er for eksempel en pandemi, en finanskrise, børskrakk, inflasjon ute av kontroll osv.
+
+### Utfordring 3.2
+
+Offentlig skole er finansiert av staten og alle barn har skoleplikt for grunnskolen. Skolen er finansiert av staten fordi denne sektoren har markedssvikt på lik linje som med helsetjenester. Man har også offentlig grunnskole for å sikre at alle får tilnærmet lik utdanning iform av utarbeidede læreplanmål for grunnskolen samt krav til lærerne og evn skoleeier ved privatskole. Dette er for å sikre at alle har grunnleggende ferdigheter i form av lesing, skriving, regning og andre kunnskaper samt innføre gode verdier og holdninger. grunnskolen er også for å sikre at individene skal kunne være oppegående nok til en grei jobb og for å gi de kunnskap nok til å kunne velge sin vei videre enten i form av fagutdanning eller høyere utdanning videre for de med motivasjon og som vil gi disse en personlig god avkastning i form av bedre lønn og god jobb. De yngre barn har ikke kunnskap nok eller forstår informasjonen og ar avhengige av at noen bestemmer for dem, i dette tilfelle er det foreldre, og ved skoleplikt er de sikret muligheter for å øke sin verdi videre basert på ønsker og ferdigheter, uten skoleplikt og gratis skole ville nok mange barn ikke gått på skolen hvis foreldre ikke hadde råd eller interesse av det til hensyn av familien.
+
+Hvis vi ser på figur 9,
+
+![Figur 9](innlev3fig77.gif){fig-align="center"}
+
+Så kan vi tenke oss at MPC er kostnaden for utdanningen iform av tid på barneskole og iform av noe økonomisk utgift på høyere utdanning, MPV er den marginale private verdien av utdanningen, la oss si grunnskolen er den marginale verdien, for det koster ikke individet noe annet enn litt tid. Da har individet god nytte i punkt Q0. Men hvis individet finner ut at hvis en investerer tid og penger i form av tapt inntekt og noe utgifter og tar mer skole og øke sin gode vil det gi marginal samfunnsverdi (MSV) iform av blandt annet når individet tjener mer vil en også betale mer skatt og holde seg friskere. Når individets netto nåverdi er større enn 0 ved å ta mer utdanning med forventet høy lønn og lett å få jobb enn det kostnaden er ved tapt lav inntekt og utgifter til skolegang. Individet vil stoppe med utdanning den dagen netto nåverdi er lik 0.
+
+Når skolen ikke koster noe eller er priset lavt med en liten egenandel er andelen som tar utdanning høyere enn hvis skolen hadde kostet mye og kun de med økonomi hadde mulighet til utdanning. Utdanning gir også økt velferd og verdiskapning ved at man investerer i humankapital og er derfor man blant annet har offentlig finansiert utdanning i Norge. Individene er de som tjener mest ved å ta utdanning da kunnskap man har tilegnet seg ikke noe man kan selge videre. det er også derfor vi har lån og stipend gjennom statens lånekasse som gir stipend ved fullførte utdanninger men også gunstig lån som gjør at man kan studere, da andre lånegivere ikke vil gi dette pga stor risiko. En annen faktor på hvorfor vi har offentlig finansiert utdanning er rettferdighetsprinsippet, det skal være mulig for alle å ta utdanning uavhengig av ens bakgrunn. Og når flere har god utdanning vil også verdiskapningen være høy og jo mer utdanning du har jo bedre lønn har du ifølge empirisk forskning, men dette kan diskuteres da ikke alle grupper med lang utdanning har like god lønn som andre med samme lengde utdanning, men da kommer vi inn på spørsmålet om hva slags sektor eller fag-side en tilhører under samt hvilken tariff/fagforening en vil være avhengig av.
+
+Ulemper ved offentlig finansiert utdanning kan være at ved empiriske observasjoner så har høyere utdanning en fordel med litt konkurranse for å heve kvaliteten på utdanningen kontra hvis alt er bestemt ved staten og alt er offentlig finansiert. Dette skinner igjennom ved verdensranking.
+
+Det er ialt en fordel med offentlig finansiert skole i grunnskole, og til en dels i høyere utdanning. Ved videreutdanning når en allerede er i jobb er denne som oftest finansiert av enten en selv eller noe stipend tilskudd fra stat eller at arbeidsgiver betaler. minuset hvis du betaler selv er at en ikke har en garanti at du får høyere lønn, eller at en ikke blir i jobben hvis arbeidsgiveren betaler og taper på dette især hvis dette er generell kunnskap. ved særskilt kurs eller utdanning som er tilknyttet den jobben en har har dette kun verdi for den arbeidsplassen en er i men ikke utenfor. Men likevel er det mange arbeidsgivere som betaler opplæring til generell kunnskap eller kompetanse og gjør investering i humankapital vel vitende om at garantien for at kunnskapen blir værende ikke nødvendigvis er positiv.
+
+#### Kilder:
+
+( *Myklathun, Sørbø ,Vidal-Gil, Nav,*Arbeid og velferd nr.2-2022, 15.06.2022, lest 3.10.2022,
+
+[Utviklingen på arbeidsmarkedet - NAVs arbeidsmarkedsprognose 2-2022 - nav.no](https://www.nav.no/no/nav-og-samfunn/kunnskap/analyser-fra-nav/arbeid-og-velferd/arbeid-og-velferd/arbeid-og-velferd-nr.2-2022/utviklingen-pa-arbeidsmarkedet-navs-arbeidsmarkedsprognose-2-2022))
+
+Andre kilder er Pensum, forelesnings notater og lærevideoene i SOK-2008-H22.
+
+Lenke til github siden hvor alle innleveringene legges:
+
+[IdaBergland/SOK-2008-2022 (github.com)](https://github.com/IdaBergland/SOK-2008-2022)
