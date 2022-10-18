@@ -1,0 +1,64 @@
+---
+title: "Oppgave 2"
+author: "Kandidatnr 2"
+date: "2022-10-18"
+output:
+  html_document:
+    df_print: paged
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+##Utfordring 4.2
+#oppgave 2
+
+
+#Laster inn pakker vi trenger
+library(ggplot2)
+library(tidyverse)
+library(readr)
+library(gridExtra)
+library(grid)
+
+
+#måtte sette arbeidsrom
+setwd("~/")
+
+#lese inn dataene
+dame<-read.csv2("women.csv")
+
+#gjøre om til tall/nummer
+dame$tot_full_rate<-as.numeric(dame$tot_full_rate)
+dame$fem_emp_rate_0_2<-as.numeric(dame$fem_emp_rate_0_2)
+dame$fem_emp_rate_6_14<-as.numeric(dame$fem_emp_rate_6_14)
+
+
+#lager plot 1
+barn_0_2 <- dame%>%
+  ggplot(aes(x=tot_full_rate,y=fem_emp_rate_0_2))+
+  geom_point()+
+  ylim(0, 100)+
+  labs(x ="Uker med 100% støtte i foreldrepermisjonen", y = "Mødre i arbeid når yngste barn er 0-2 år")+
+  geom_smooth(method=lm, se=FALSE)+
+  theme_bw()
+
+#lager plot 2
+barn_6_14 <- dame%>%
+  ggplot(aes(x=tot_full_rate,y=fem_emp_rate_6_14))+
+  geom_point()+
+  ylim(0, 100)+
+  labs(x ="Uker med 100% støtte i foreldrepermisjonen", y = "Mødre i arbeid når yngste barn er 6-14 år")+
+  geom_smooth(method=lm, se=FALSE)+
+  theme_bw()
+
+#setter disse sammen ved siden av hverandre
+grid.arrange(barn_0_2,barn_6_14, nrow = 1,  top = textGrob("Sammenhengen mellom foreldrepermisjonens lengde og yrkesdeltagelse etter yngste barns alder",gp=gpar(fontsize=20,font=3)))
+
+```
+
