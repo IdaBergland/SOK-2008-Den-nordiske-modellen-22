@@ -1,0 +1,153 @@
+---
+title: "SOK-2008-2022-oppgave5"
+author: "Kandidatnummer 2"
+date: "2022-10-28"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Utfordring 5.1
+#Oppgave 1
+```{r cars}
+#Laster inn relevante pakker. 
+library(tidyverse)
+library(rjstat)
+library(janitor)
+library(gdata)
+library(httr)
+library(ggplot2)
+
+#lagrer url
+url <- "https://data.ssb.no/api/v0/no/table/05185/"
+
+#lagrer etterspørringen.
+queryen <- '{
+  "query": [
+    {
+      "code": "Kjonn",
+      "selection": {
+        "filter": "item",
+        "values": [
+          "1",
+          "2"
+        ]
+      }
+    },
+    {
+      "code": "Landbakgrunn",
+      "selection": {
+        "filter": "agg:Verdensdel2",
+        "values": [
+          "b11",
+          "b12",
+          "b13",
+          "b14",
+          "b2",
+          "b3",
+          "b4",
+          "b5",
+          "b6",
+          "b8",
+          "b9"
+        ]
+      }
+    },
+    {
+      "code": "Tid",
+      "selection": {
+        "filter": "item",
+        "values": [
+          "2005",
+          "2006",
+          "2007",
+          "2008",
+          "2009",
+          "2010",
+          "2011",
+          "2012",
+          "2013",
+          "2014",
+          "2015",
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021"
+        ]
+      }
+    }
+  ],
+  "response": {
+    "format": "json-stat2"
+  }
+}'
+
+#lagre disse i en ny variabel for så lagre i tibble format.
+innv <- url %>%
+  POST(body = queryen, encode = "json")
+innv <-  innv %>%
+  content("text") %>%
+  fromJSONstat() %>%
+  as_tibble()
+
+#endre navn på kolonner
+colnames(innv) <- c("Kjonn", "landbakgrunn", "statistikkvariabel","year", "value")
+
+#lage en total, altså mann + dame samt dele totalen på 1000 for enklere y #akse tall
+innv <- innv %>% group_by(landbakgrunn,year) %>%
+  summarise(total=sum(value))
+innv <- innv %>% mutate(Antall = total/1000)
+
+
+#nå lager vi plottet
+ggplot(innv, aes(x= year, y= Antall, color=landbakgrunn)) + geom_point() +
+  labs(title = "Innvandring over tid fra forskjellige områder
+       i tidsperioden 2005 - 2021") +
+  geom_line(aes(group=landbakgrunn), size=1)+
+  xlab("Year 2005- 2021") +
+  ylab("Innvandrere i 1000")
+
+```
+
+#Oppgave 2
+
+```{r}
+##Oppgave 2
+
+setwd("~/")
+
+library(readxl)
+#laster inn data
+easteuropa <- read_excel("sysselsatteKopi.xlsx")
+#ser på toppen
+head(easteuropa)
+#rydder litt og henter ut de to radene jeg trenger
+easteuropa <- clean_names(easteuropa)
+easteuropa <- remove_empty(easteuropa, which = c("rows", "cols"), quiet = FALSE)
+easteuropa <- easteuropa[-c(1, 2, 3, 4,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55), ]
+
+easteuropa <- subset(easteuropa, select = -c(1, 2, 3))
+#endrer kolonnenavn
+colnames(easteuropa) <- c("Jobbomrode", "Antall")
+
+#pga kræsj i maskinen fikk jeg ikke fullført oppgave 2 i R 
+#og måtte bruke exel istedet da tiden ikke strakk til å rekke å 
+#fikse ny datamskin og få alt av programvare oppe å gå og rekke videre koding
+#før deadline.
+
+
+```
+
+
+
+
+
+
+
+
+
+
